@@ -1,0 +1,8 @@
+export const services=[
+{id:'website',category:'build',icon:'⌘',name:'Website development',description:'A beautiful, responsive home for your business. Built to make a lasting first impression.',features:['Responsive across every screen','Performance & SEO foundations','Launch-ready handover'],price:14999,tag:'A GREAT PLACE TO START'},
+{id:'ui',category:'design',icon:'✧',name:'UI / UX design',description:'Turn complex ideas into effortless experiences that your customers will love using.',features:['Thoughtful user journeys','Custom interface design','Interactive design prototype'],price:7999},
+{id:'google',category:'grow',icon:'◎',name:'Google Business Profile',description:'Help nearby customers discover your business and take the next step with confidence.',features:['Profile setup & optimisation','Business information & imagery','Verification guidance'],price:2499},
+{id:'deployment',category:'build',icon:'↗',name:'Deployment & launch',description:'Take your project from development to the world, with the technical details taken care of.',features:['Hosting & domain configuration','HTTPS & launch checks','Deployment handover'],price:2999},
+{id:'support',category:'grow',icon:'♡',name:'Website care & support',description:'Keep your digital presence in good shape, with a real person in your corner.',features:['Monthly maintenance support','Updates & health checks','Small content changes'],price:1999,suffix:'/ month'},
+{id:'app',category:'build',icon:'▣',name:'Mobile app experiences',description:'Put your business within easy reach, with an installable, responsive web app.',features:['Responsive app interface','Installable PWA setup','Online & offline foundations'],price:19999}
+];

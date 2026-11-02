@@ -7,7 +7,7 @@ import { PortalRepository } from '../portal/repository.mjs';
 import { PortalError, ingestRecord } from '../portal/model.mjs';
 import { LocalOwnerAuth, mutationGuard, localCookie, cookie, csrfCookie, sessionCookie } from './auth.mjs';
 import { projectRoot } from './database.mjs';
-import business from '../../config/business.mjs';
+import business from '../../config/public-business.mjs';
 import {metaConfig,providerStatus} from '../reminders/meta.mjs';
 import {DocumentRepository} from '../documents/repository.mjs';
 import {localDocumentStore} from '../documents/local-store.mjs';
