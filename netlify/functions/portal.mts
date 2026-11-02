@@ -1,0 +1,11 @@
+import { getUser, getSettings, getIdentityConfig, verifyRequestOrigin, admin } from '@netlify/identity';
+import { getDatabase } from '@netlify/database';
+import { createHandler } from '../../server/portal/api.mjs';
+import { PortalRepository } from '../../server/portal/repository.mjs';
+import {metaConfig,providerStatus} from '../../server/reminders/meta.mjs';
+import {CloudInvitations} from '../../server/identity/invitations.mjs';
+import {verifiedUserReader} from '../../server/identity/verified-user.mjs';
+import {DocumentRepository} from '../../server/documents/repository.mjs';
+import {cloudDocumentStore} from '../../server/documents/cloud-store.mjs';
+export default createHandler({ getUser:verifiedUserReader({getUser,readUser:id=>admin.getUser(id)}), getSettings, verifyRequestOrigin, repository: () => new PortalRepository(getDatabase().pool),documents:()=>new DocumentRepository(getDatabase().pool,cloudDocumentStore()),inviteClient:(actor,project)=>new CloudInvitations({pool:getDatabase().pool,getIdentityConfig}).send(actor,project),reminderStatus:()=>providerStatus(metaConfig(name=>Netlify.env.get(name))) });
+export const config = { path: '/api/portal/*' };

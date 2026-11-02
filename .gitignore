@@ -1,0 +1,20 @@
+.netlify/
+.tools/
+.data/
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Local release archives and private verification captures are not source code.
+*.zip
+docs/*.png
+docs/*.jpg
+docs/*.jpeg
+docs/*.pdf
+docs/authentication-check-*.md
+*.log
+
+# Keep business billing details and deployment/account operating notes local.
+/config/business.mjs
+/docs/

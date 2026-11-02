@@ -1,0 +1,10 @@
+ALTER TABLE skts_requests ADD COLUMN progress_plan_agreed boolean NOT NULL DEFAULT false;
+ALTER TABLE skts_requests ADD COLUMN progress_plan_agreed_at timestamptz;
+ALTER TABLE skts_project_services DROP CONSTRAINT skts_project_services_status_check;
+ALTER TABLE skts_project_services ADD CONSTRAINT skts_project_services_status_check CHECK (status IN ('pending','in_progress','delivered','awaiting_approval','completed','on_hold','cancelled'));
+ALTER TABLE skts_project_services ADD COLUMN weight_points integer CHECK (weight_points BETWEEN 1 AND 100);
+ALTER TABLE skts_project_services ADD COLUMN target_date date;
+ALTER TABLE skts_project_services ADD COLUMN delivered_at timestamptz;
+ALTER TABLE skts_project_services ADD COLUMN completed_at timestamptz;
+ALTER TABLE skts_project_services ADD COLUMN accepted_at timestamptz;
+ALTER TABLE skts_project_services ADD COLUMN accepted_by text;

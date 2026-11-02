@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "SKTS-netlify"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/portal/*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "same-origin"
+    X-Content-Type-Options = "nosniff"
