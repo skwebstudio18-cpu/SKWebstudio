@@ -1,28 +1,34 @@
 import {createReference,readReceipts,rememberReceipt,clearReceipts,receiptLabel,receiptStatus,receiptText} from '/request-references.mjs?v=9';
 import {services} from '/services.mjs?v=1';
+import {legacyDestination} from '/site-navigation.mjs?v=1';
+
+const legacy=legacyDestination(location.pathname,location.hash);
+if(legacy)location.replace(legacy);
+window.addEventListener('hashchange',()=>{const destination=legacyDestination(location.pathname,location.hash);if(destination)location.replace(destination);});
 
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 let cart;try{const saved=JSON.parse(localStorage.getItem('skts-cart')||'[]');cart=Array.isArray(saved)?[...new Set(saved.filter(id=>services.some(s=>s.id===id)))]:[];}catch{cart=[];}
 const $=s=>document.querySelector(s);const total=()=>cart.reduce((sum,id)=>sum+services.find(s=>s.id===id).price,0);
 function notify(message){$('#toast').textContent=message;$('#toast').classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('#toast').classList.remove('show'),2500);}
-function save(){try{localStorage.setItem('skts-cart',JSON.stringify(cart));}catch{}$('#cart-count').textContent=cart.length;renderServices(document.querySelector('[data-filter].active').dataset.filter);renderCart();}
-function renderServices(filter='all'){$('#service-grid').innerHTML=services.filter(s=>filter==='all'||s.category===filter).map(s=>`<article class="service-card"><div class="service-icon" aria-hidden="true"><i class="ti ti-${({website:'browser',ui:'pencil',google:'map-pin',deployment:'rocket',support:'headset',app:'device-mobile'})[s.id]}"></i></div>${s.tag?`<span class="tag">${s.tag}</span>`:''}<h3>${s.name}</h3><p>${s.description}</p><ul>${s.features.map(f=>`<li><i class="ti ti-check" aria-hidden="true"></i>${f}</li>`).join('')}</ul><div class="card-bottom"><div class="price"><small>Starting price</small><strong>${money(s.price)}</strong> <small>${s.suffix||'per project'}</small></div><button class="add-button" data-add="${s.id}" ${cart.includes(s.id)?'disabled':''}>${cart.includes(s.id)?'Added':'Select service'}<span class="sr-only" hidden> ${s.name}</span></button></div></article>`).join('');}
-function renderCart(){$('#cart-items').innerHTML=cart.length?cart.map(id=>{const s=services.find(s=>s.id===id);return `<div class="cart-item"><div><strong>${s.name}</strong><p>${s.suffix?'Monthly service · first month':'One project'}</p><button class="remove" data-remove="${s.id}">Remove</button></div><strong>${money(s.price)}</strong></div>`;}).join(''):'<div class="empty"><h3>Your next chapter is waiting.</h3><p>Explore our services and add one to your shortlist.</p><button class="button" data-close>Explore services</button></div>';$('#cart-summary').innerHTML=cart.length?`<div class="total-row"><span>Indicative total</span><strong>${money(total())}</strong></div><p class="pricing-note">Starting prices apply to the listed scope. Monthly services include the first month. No automatic renewal is enabled.</p><button class="button full" id="checkout-open">Request these services</button>`:'';}
+function save(){try{localStorage.setItem('skts-cart',JSON.stringify(cart));}catch{}$('#cart-count').textContent=cart.length;renderServices(document.querySelector('[data-filter].active')?.dataset.filter);renderCart();}
+function renderServices(filter='all'){if(!$('#service-grid'))return;$('#service-grid').innerHTML=services.filter(s=>filter==='all'||s.category===filter).map(s=>`<article class="service-card"><div class="service-icon" aria-hidden="true"><i class="ti ti-${({website:'browser',ui:'pencil',google:'map-pin',deployment:'rocket',support:'headset',app:'device-mobile'})[s.id]}"></i></div>${s.tag?`<span class="tag">${s.tag}</span>`:''}<h3>${s.name}</h3><p>${s.description}</p><ul>${s.features.map(f=>`<li><i class="ti ti-check" aria-hidden="true"></i>${f}</li>`).join('')}</ul><div class="card-bottom"><div class="price"><small>Starting price</small><strong>${money(s.price)}</strong> <small>${s.suffix||'per project'}</small></div><button class="add-button" data-add="${s.id}" ${cart.includes(s.id)?'disabled':''}>${cart.includes(s.id)?'Added':'Select service'}<span class="sr-only" hidden> ${s.name}</span></button></div></article>`).join('');}
+function renderCart(){$('#cart-items').innerHTML=cart.length?cart.map(id=>{const s=services.find(s=>s.id===id);return `<div class="cart-item"><div><strong>${s.name}</strong><p>${s.suffix?'Monthly service · first month':'One project'}</p><button class="remove" data-remove="${s.id}">Remove</button></div><strong>${money(s.price)}</strong></div>`;}).join(''):'<div class="empty"><h3>Your next chapter is waiting.</h3><p>Explore our services and add one to your shortlist.</p><a class="button" href="/services/">Explore services</a></div>';$('#cart-summary').innerHTML=cart.length?`<div class="total-row"><span>Indicative total</span><strong>${money(total())}</strong></div><p class="pricing-note">Starting prices apply to the listed scope. Monthly services include the first month. No automatic renewal is enabled.</p><button class="button full" id="checkout-open">Request these services</button>`:'';}
 document.addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(add&&!cart.includes(add.dataset.add)){cart.push(add.dataset.add);save();notify('Service added to your shortlist');}const remove=e.target.closest('[data-remove]');if(remove){cart=cart.filter(id=>id!==remove.dataset.remove);save();}if(e.target.closest('[data-close]'))e.target.closest('dialog').close();if(e.target.closest('#checkout-open')){$('#cart-dialog').close();$('#checkout-form').hidden=false;$('#checkout-status').hidden=true;updateRequestFields();$('#checkout-total').innerHTML=`<div class="total-row"><span>Indicative total</span><strong>${money(total())}</strong></div>`;$('#checkout-dialog').showModal();}});
 document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(f=>{f.classList.toggle('active',f===b);f.setAttribute('aria-pressed',String(f===b));});renderServices(b.dataset.filter);});
 $('#cart-open').onclick=()=>$('#cart-dialog').showModal();document.querySelectorAll('#quote-open,[data-quote]').forEach(b=>b.onclick=()=>$('#quote-dialog').showModal());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
 $('#quote-download').onclick=e=>{e.preventDefault();const form=$('#quote-form');if(!['name','email','brief'].every(key=>form.elements.namedItem(key).reportValidity()))return;const data=new FormData(form);const content=`SKTS — Project brief\n\nName: ${data.get('name')}\nEmail: ${data.get('email')}\n\nProject:\n${data.get('brief')}\n`;const url=URL.createObjectURL(new Blob([content],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='SKTS-project-brief.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Project brief downloaded');};
 $('#year').textContent=new Date().getFullYear();save();let installPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#install').hidden=false;});$('#install').onclick=async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;$('#install').hidden=true;}};if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
-document.querySelectorAll('[data-category]').forEach(a=>a.addEventListener('click',()=>document.querySelector(`[data-filter="${a.dataset.category}"]`).click()));
+const category=new URLSearchParams(location.search).get('category');
+if(['build','design','grow'].includes(category))document.querySelector(`[data-filter="${category}"]`)?.click();
 const menuButton=$('#menu-toggle');menuButton.onclick=()=>{const open=$('#main-nav').classList.toggle('open');menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Close navigation':'Open navigation');};
 $('#main-nav').addEventListener('click',e=>{if(e.target.closest('a')){$('#main-nav').classList.remove('open');menuButton.setAttribute('aria-expanded','false');menuButton.setAttribute('aria-label','Open navigation');}});
 
 
-$('#copy-upi').onclick=async()=>{
+$('#copy-upi')?.addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText($('#upi-id').textContent.trim());notify('UPI ID copied');}
   catch{notify('Please select and copy the UPI ID shown above.');}
-};
+});
 
 function savedReceipts(){
   try{return readReceipts(window.localStorage);}catch{return [];}
@@ -43,6 +49,7 @@ function openPaymentForm(reference=''){
 }
 function renderReceiptHistory(){
   const list=$('#request-history-list');
+  if(!list)return;
   const receipts=savedReceipts();
   list.replaceChildren();$('#clear-receipts').hidden=receipts.length===0;
   if(!receipts.length){const message=document.createElement('p');message.textContent='No submission references saved on this browser yet. After a successful submission, your reference will appear here. If you used another device, contact us with the reference you saved.';list.append(message);return;}
@@ -67,8 +74,8 @@ function recordSubmission(form,reference){
   panel.receipt=receipt;panel.querySelector('[data-reference]').textContent=reference;panel.hidden=false;
   renderReceiptHistory();
 }
-$('#payment-open').onclick=()=>openPaymentForm();
-$('#clear-receipts').onclick=()=>{try{if(!clearReceipts(window.localStorage)){notify('Could not clear references on this browser.');return;}}catch{notify('Could not clear references on this browser.');return;}renderReceiptHistory();};
+$('#payment-open')?.addEventListener('click',()=>openPaymentForm());
+$('#clear-receipts')?.addEventListener('click',()=>{try{if(!clearReceipts(window.localStorage)){notify('Could not clear references on this browser.');return;}}catch{notify('Could not clear references on this browser.');return;}renderReceiptHistory();});
 document.addEventListener('click',async event=>{
   const panel=event.target.closest('[data-receipt]');if(!panel)return;
   if(event.target.closest('[data-copy-reference]')){try{await navigator.clipboard.writeText(panel.receipt.reference);notify('Reference copied');}catch{notify('Please select and copy the reference shown above.');}}

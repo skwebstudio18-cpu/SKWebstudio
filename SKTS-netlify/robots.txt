@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /portal/
+Disallow: /api/
+Disallow: /references/
+Sitemap: https://lighthearted-shortbread-30a0d3.netlify.app/sitemap.xml

@@ -148,7 +148,29 @@
   #dashboard .report-milestone.cancelled { border-left-color: #68778b; }
   #dashboard .report-milestone.on_hold { border-left-color: #c7758c; }
   #dashboard #reminder-provider-status { background: #e9eef5; color: #3b526e; border-left: 3px solid #869bb7; font-size: 12px; }
-  #dashboard, #projects-panel, #payments-panel { scroll-margin-top: 20px; }
+  /* Separate the long project record into familiar, clearly labelled areas. */
+  #dashboard .detail > h3 { margin-top: 30px; padding-top: 22px; border-top: 1px solid #dce6e4; }
+  #dashboard .project-finances,
+  #dashboard .service-progress,
+  #dashboard .reminder-history,
+  #dashboard .project-documents { margin-top: 26px; padding: 22px; border: 1px solid #dce6e4; border-radius: 12px; }
+  #dashboard .project-finances { background: #eff6fc; border-color: #d6e3f0; }
+  #dashboard .service-progress { background: #f1f8f4; border-color: #d6e7dd; }
+  #dashboard .reminder-history { background: #f8f9fb; border-color: #dfe5ec; }
+  #dashboard .project-documents { background: #f5f3fa; border-color: #e1dced; }
+  #dashboard .project-finances > h3,
+  #dashboard .service-progress > h3,
+  #dashboard .reminder-history > h3,
+  #dashboard .project-documents > h3 { margin: 0 0 14px; color: var(--workspace-deep); font-size: 17px; }
+  #dashboard .client-service,
+  #dashboard .document-card,
+  #dashboard .document-empty { background: #fff; }
+  #dashboard .admin-section { margin-top: 16px; border-radius: 10px; background: #fafbfc; }
+  #dashboard .admin-section > summary { padding-block: 5px; }
+  #dashboard .payment-section { margin-top: 30px; background: #edf3fb; border-color: #d3e0ee; }
+  #dashboard .payment-card { background: #fff; border-color: #d6e0ef; }
+  #dashboard .panel-heading h2 { letter-spacing: -.4px; }
+  #dashboard, #projects-panel, #payments-panel, #project-documents { scroll-margin-top: 24px; }
   @media (max-width: 1000px) {
     .dashboard-heading { padding: 29px; }
     .dashboard-welcome { max-width: 63%; }
@@ -179,6 +201,10 @@
     .summary-card strong { font-size: 28px; margin-bottom: 3px; }
     #dashboard .report-heading { flex-wrap: wrap; gap: 12px; }
     #dashboard .panel { padding: 22px; }
+    #dashboard .project-finances,
+    #dashboard .service-progress,
+    #dashboard .reminder-history,
+    #dashboard .project-documents { padding: 17px; }
   }
 }
 @media print { .workspace-nav { display: none !important; } }

@@ -1,6 +1,8 @@
 import { build } from 'esbuild';
 import { mkdir,readFile,writeFile } from 'node:fs/promises';
 import {loginScreen} from '../src/portal/login-view.mjs';
+import {buildSitePages} from './site-pages.mjs';
+await buildSitePages();
 await mkdir('SKTS-netlify/portal/assets', { recursive: true });
 await build({ entryPoints: ['src/portal/app.mjs','src/portal/callback.mjs'], bundle:true, outdir:'SKTS-netlify/portal/assets', format:'esm', platform:'browser', target:'es2022', minify:true, legalComments:'none', entryNames:'[name]', sourcemap:false });
 const template=await readFile('SKTS-netlify/portal/index.html','utf8');

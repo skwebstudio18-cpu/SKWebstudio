@@ -11,6 +11,8 @@ Source for the SKTS public website and its authenticated Admin and Client projec
 
 The public website includes service enquiries and manual UPI payment references handled by Netlify Forms. The project portal includes private client invitations, service milestones, weighted progress charts, budgets, bank-verified payments, document versions and reviews, delivery acceptance, and printable project reports.
 
+The public website has separate Home, Services & Pricing, Work, Company, Contact, Payments and Your References pages. `src/site/template.html` contains shared content and enquiry forms; `tools/site-pages.mjs` composes the pages during `npm run build`. Edit the template instead of the generated HTML. Each page has its own title, description and canonical URL. Old section bookmarks route to the new pages, and service shortlists carry between pages on the same browser.
+
 The public **Ask SKTS** assistant provides fixed service information and optional streamed AI guidance through Netlify AI Gateway and the official OpenAI SDK. Service cards, fixed price answers and AI grounding share `SKTS-netlify/services.mjs`. AI has no tools and cannot access project records, change accounts, verify payments or submit enquiries. Its quote button opens the normal enquiry form for the visitor to complete.
 
 AI currently uses `gpt-6-luna`, checked against Netlify's provider catalogue on 2 November 2026. Usage consumes existing Netlify credits; no plan upgrade or recharge setting is changed. Persistent transactional limits allow at most 20 provider requests per India day across the site and five per network, plus eight HTTP requests per minute per network/domain. Input, history and output are bounded; automatic SDK retries are disabled. Failed provider attempts still consume an allowance. Set `SKTS_AI_ENABLED=false` in the Functions environment and redeploy to disable AI replies; fixed service guidance remains available.
@@ -34,7 +36,7 @@ npm run dev
 
 Open http://localhost:8080/portal/admin/ to set up the local owner account. Local accounts and records stay on the local computer and are separate from production. The local server binds to loopback only. Stop it with Ctrl+C.
 
-The 98 tests cover authentication, account isolation, invitations, documents, service progress, payments, delivery acceptance, reminders, AI request validation, stream failures and concurrent daily AI quotas. Tests use isolated fixtures and fake credentials.
+The tests cover page navigation and shared forms, authentication, account isolation, invitations, documents, service progress, payments, delivery acceptance, reminders, AI request validation, stream failures and concurrent daily AI quotas. Tests use isolated fixtures and fake credentials.
 
 ## Deployment
 
