@@ -1,6 +1,6 @@
 import {createReference,readReceipts,rememberReceipt,clearReceipts,receiptLabel,receiptStatus,receiptText} from '/request-references.mjs?v=9';
 import {services} from '/services.mjs?v=1';
-import {legacyDestination} from '/site-navigation.mjs?v=1';
+import {legacyDestination} from '/site-navigation.mjs?v=2';
 
 const legacy=legacyDestination(location.pathname,location.hash);
 if(legacy)location.replace(legacy);
@@ -15,7 +15,14 @@ function renderServices(filter='all'){if(!$('#service-grid'))return;$('#service-
 function renderCart(){$('#cart-items').innerHTML=cart.length?cart.map(id=>{const s=services.find(s=>s.id===id);return `<div class="cart-item"><div><strong>${s.name}</strong><p>${s.suffix?'Monthly service · first month':'One project'}</p><button class="remove" data-remove="${s.id}">Remove</button></div><strong>${money(s.price)}</strong></div>`;}).join(''):'<div class="empty"><h3>Your next chapter is waiting.</h3><p>Explore our services and add one to your shortlist.</p><a class="button" href="/services/">Explore services</a></div>';$('#cart-summary').innerHTML=cart.length?`<div class="total-row"><span>Indicative total</span><strong>${money(total())}</strong></div><p class="pricing-note">Starting prices apply to the listed scope. Monthly services include the first month. No automatic renewal is enabled.</p><button class="button full" id="checkout-open">Request these services</button>`:'';}
 document.addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(add&&!cart.includes(add.dataset.add)){cart.push(add.dataset.add);save();notify('Service added to your shortlist');}const remove=e.target.closest('[data-remove]');if(remove){cart=cart.filter(id=>id!==remove.dataset.remove);save();}if(e.target.closest('[data-close]'))e.target.closest('dialog').close();if(e.target.closest('#checkout-open')){$('#cart-dialog').close();$('#checkout-form').hidden=false;$('#checkout-status').hidden=true;updateRequestFields();$('#checkout-total').innerHTML=`<div class="total-row"><span>Indicative total</span><strong>${money(total())}</strong></div>`;$('#checkout-dialog').showModal();}});
 document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(f=>{f.classList.toggle('active',f===b);f.setAttribute('aria-pressed',String(f===b));});renderServices(b.dataset.filter);});
-$('#cart-open').onclick=()=>$('#cart-dialog').showModal();document.querySelectorAll('#quote-open,[data-quote]').forEach(b=>b.onclick=()=>$('#quote-dialog').showModal());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
+function openEnquiry(){
+  const dialog=$('#quote-dialog');
+  if(dialog){dialog.showModal();return;}
+  const form=$('#quote-form');
+  form.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  form.elements.namedItem('name').focus({preventScroll:true});
+}
+$('#cart-open').onclick=()=>$('#cart-dialog').showModal();document.querySelectorAll('#quote-open,[data-quote]').forEach(b=>b.onclick=openEnquiry);document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();}}));
 $('#quote-download').onclick=e=>{e.preventDefault();const form=$('#quote-form');if(!['name','email','brief'].every(key=>form.elements.namedItem(key).reportValidity()))return;const data=new FormData(form);const content=`SKTS — Project brief\n\nName: ${data.get('name')}\nEmail: ${data.get('email')}\n\nProject:\n${data.get('brief')}\n`;const url=URL.createObjectURL(new Blob([content],{type:'text/plain'}));const a=document.createElement('a');a.href=url;a.download='SKTS-project-brief.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Project brief downloaded');};
 $('#year').textContent=new Date().getFullYear();save();let installPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('#install').hidden=false;});$('#install').onclick=async()=>{if(installPrompt){await installPrompt.prompt();installPrompt=null;$('#install').hidden=true;}};if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
@@ -81,7 +88,7 @@ document.addEventListener('click',async event=>{
   if(event.target.closest('[data-copy-reference]')){try{await navigator.clipboard.writeText(panel.receipt.reference);notify('Reference copied');}catch{notify('Please select and copy the reference shown above.');}}
   if(event.target.closest('[data-download-receipt]'))downloadReceipt(panel.receipt);
   if(event.target.closest('[data-report-payment]'))openPaymentForm(panel.receipt.reference);
-  if(event.target.closest('[data-view-references]'))event.target.closest('dialog').close();
+  if(event.target.closest('[data-view-references]'))event.target.closest('dialog')?.close();
 });
 renderReceiptHistory();
 
