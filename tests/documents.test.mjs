@@ -26,7 +26,13 @@ const uploadRequest=({ref=reference,id=randomUUID(),document='',title='Requireme
 const get=(path,actor=client)=>handler(actor)(new Request(origin+'/api/portal/requests/'+path));
 const review=(id,body,actor=owner)=>handler(actor)(new Request(origin+'/api/portal/admin/requests/'+reference+'/documents/'+id+'/review',{method:'PATCH',headers:{origin,'content-type':'application/json'},body:JSON.stringify(body)}));
 before(async()=>{
-  database=new NetlifyDB({logger:()=>{}});const connectionString=await database.start();await database.applyMigrations('netlify/database/migrations');pool=getDatabase({connectionString}).pool;docs=new DocumentRepository(pool,store);
+  database=new NetlifyDB({logger:()=>{}});const connectionString=await database.start();await database.applyMigrations('netlify/database/migrations');pool=getDatabase({connectionString}).pool;
+  // NetlifyDB forwards every socket to one PGlite backend. Multiple pool
+  // clients would interleave BEGIN/COMMIT on that same database session.
+  // Queue fixture connections; real PostgreSQL row-lock contention needs a
+  // separate multi-session integration test.
+  pool.options.max=1;
+  docs=new DocumentRepository(pool,store);
   for(const [ref,email]of [[reference,client.email],[otherReference,outsider.email]])await pool.query("INSERT INTO skts_requests(reference,kind,customer_email,customer_name) VALUES ($1,'enquiry',$2,'Test client')",[ref,email]);
 });
 after(async()=>{await pool?.end();await database?.stop();});
@@ -75,7 +81,7 @@ test('forged document IDs cannot attach a file or review to another project',asy
   const previous=writes;assert.equal((await handler(outsider)(uploadRequest({ref:otherReference,document:documentId}))).status,404);assert.equal(writes,previous);
   const request=new Request(origin+'/api/portal/admin/requests/'+otherReference+'/documents/'+firstVersion+'/review',{method:'PATCH',headers:{origin,'content-type':'application/json'},body:JSON.stringify({status:'approved',note:'Forged scope',revision:2})});assert.equal((await handler(owner)(request)).status,404);
 });
-test('concurrent version uploads serialize per project without overwriting files',async()=>{
+test('concurrent upload requests preserve distinct versions in the local database',async()=>{
   const responses=await Promise.all([handler(client)(uploadRequest({document:documentId,bytes:'Concurrent A'})),handler(client)(uploadRequest({document:documentId,bytes:'Concurrent B'}))]);assert.ok(responses.every(r=>r.status===201));
   const data=await(await get(reference+'/documents')).json();assert.deepEqual(data.items[0].versions.map(v=>v.version),[4,3,2,1]);
 });
