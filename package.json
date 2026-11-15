@@ -19,5 +19,9 @@
     "@netlify/database-dev": "^1.0.1",
     "esbuild": "^0.28.2",
     "netlify-cli": "^27.16.1"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": "24.x"
   }
 }

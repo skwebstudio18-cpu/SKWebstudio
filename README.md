@@ -25,6 +25,14 @@ Admin and Client login pages and dashboards have distinct visual themes. The ser
 
 The Meta WhatsApp reminder integration is prepared but disabled until server credentials, an approved message template and client consent are configured. A submitted payment reference never marks money as received without admin bank verification.
 
+## Licence and contributions
+
+SKTS is licensed under the [MIT licence](LICENSE). Third-party dependencies and bundled assets retain their original licences, including the [Tabler MIT notice](SKTS-netlify/assets/TABLER-LICENSE.txt). Reusing a brand name or logo does not imply endorsement by its owner.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, source files, tests, and pull requests, and [SECURITY.md](SECURITY.md) for private vulnerability reports. `private: true` in `package.json` prevents accidental npm publication; the project licence is declared separately.
+
+The Node 24 CI workflow builds the site and runs the fixture tests for pull requests and pushes to `main`. It does not deploy the site or require production credentials.
+
 ## Local development
 
 Use Node.js 24.
